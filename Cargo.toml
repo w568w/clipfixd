@@ -1,0 +1,12 @@
+[package]
+name = "clipfixd"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+x11-clipboard = { git = "https://github.com/songokas/x11-clipboard" }
+anyhow = "1"
+wl-clipboard-rs = "*"
+wayland-clipboard-listener = "*"
+url = "2"
+tempfile = "3"

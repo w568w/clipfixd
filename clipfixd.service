@@ -1,0 +1,21 @@
+[Unit]
+Description=Clipboard compatibility daemon for X11 and Wayland
+Documentation=https://github.com/w568w/clipfixd
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.cargo/bin/clipfixd
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=default.target
