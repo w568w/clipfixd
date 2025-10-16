@@ -3,6 +3,12 @@ name = "clipfixd"
 version = "0.1.0"
 edition = "2024"
 
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+debug = "line-tables-only"
+
 [dependencies]
 x11-clipboard = { git = "https://github.com/songokas/x11-clipboard" }
 anyhow = "1"
