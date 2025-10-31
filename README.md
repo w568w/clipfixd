@@ -4,7 +4,7 @@
 
 ## 1. 它做什么？
 
-clipfixd 监控 X11 和 Wayland 剪贴板，自动转换不兼容的剪贴板格式，以提升跨环境的兼容性。
+clipfixd 监控 X11 / Wayland 剪贴板，自动转换不兼容的剪贴板格式，以提升跨环境的兼容性。
 
 尤其是针对某些采用错误或落后逻辑实现剪贴板的 Electron 和 X11 应用（如 QQ、WPS、飞书）。
 
@@ -73,17 +73,18 @@ journalctl --user -u clipfixd.service -f
 ## 4. 需求
 
 - 同时支持 X11 和 Wayland 的 Linux 桌面环境
-- Wayland 混成器支持 [`wlr-data-control-unstable-v1`](https://wayland.app/protocols/wlr-data-control-unstable-v1)，如 KWin、Sway、Hyprland 等
+- 原则上来说本应用只支持 KWin（即 KDE Plasma Wayland）。但也可能在其他 Wayland 混成器上工作良好，前提是：
+  - Wayland 混成器支持 [`ext-data-control-v1`](https://wayland.app/protocols/wayland-protocols/336)，如 KWin、Sway、Hyprland 等
 - 你确实遇到过剪贴板问题！
 
 ## 5. 技术细节
 
-clipfixd 运行两个线程：
+clipfixd 假定你的桌面环境或混成器已经妥善[处理了 X11 和 Wayland 剪贴板同步问题](https://blog.martin-graesslin.com/blog/2016/07/synchronizing-the-x11-and-wayland-clipboard/)。例如 KWin 会在 X11 或 Wayland 剪贴板内容变化时，自动将内容同步到另一个剪贴板系统。
 
-- **X11 监听器**：使用 `x11-clipboard` 监控 X11 剪贴板
-- **Wayland 监听器**：使用 `wayland-clipboard-listener` 监控 Wayland 剪贴板
+clipfixd 运行时仅使用 `wayland-clipboard-listener` 监听 Wayland 剪贴板的变化：当检测到特定 MIME 类型时，执行格式补充并更新 X11 剪贴板。
 
-当检测到特定 MIME 类型时，执行格式转换并更新另一个剪贴板系统。
+**Q：为什么不更新 Wayland 剪贴板？**  
+**A：** KDE 上的 Wayland -> X11 方向的同步存在一些问题。具体来说，`wl-clipboard-rs` 库的更新无法被 KWin 正确监听（不过，在 Wayland 应用程序中的平常的 <kbd>Ctrl</kbd> + <kbd>C</kbd> 操作则是能被正常监听的），导致剪贴板内容不会被 KWin 同步到 X11 剪贴板。相反，KWin 的 X11 -> Wayland 方向的同步工作正常。因此，clipfixd 选择更新 X11 剪贴板以确保兼容性。
 
 ## 6. 已知并修复的问题
 

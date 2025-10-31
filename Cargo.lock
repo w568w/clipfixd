@@ -567,7 +567,7 @@ dependencies = [
 [[package]]
 name = "wayland-clipboard-listener"
 version = "0.5.0"
-source = "git+https://github.com/w568w/wayland-clipboard-listener#eaf3ec74a9417de52760e02c1da40ad7c903e6c9"
+source = "git+https://github.com/w568w/wayland-clipboard-listener#636bbebd516a38aca0c9b619e4cffe1b17b46785"
 dependencies = [
  "log",
  "os_pipe",
