@@ -13,7 +13,7 @@ debug = "line-tables-only"
 x11-clipboard = { git = "https://github.com/songokas/x11-clipboard" }
 anyhow = "1"
 wl-clipboard-rs = { git = "https://github.com/YaLTeR/wl-clipboard-rs" }
-wayland-clipboard-listener = { git = "https://github.com/w568w/wayland-clipboard-listener" }
+wayland-clipboard-listener = { git = "https://github.com/Decodetalkers/wayland-clipboard-listener" }
 url = "2"
 tempfile = "3"
 timeout-readwrite = "0.4.0"
