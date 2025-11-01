@@ -72,7 +72,7 @@ fn copy_to_wayland_clipboard(sources: HashMap<String, Vec<u8>>) -> anyhow::Resul
 fn copy_to_x11_clipboard(sources: HashMap<String, Vec<u8>>) -> anyhow::Result<()> {
     let mut targets = vec![];
     for (mime_type, data) in sources {
-        let atom = X11_CLIPBOARD.getter.get_atom(&mime_type, true)?;
+        let atom = X11_CLIPBOARD.getter.get_atom(&mime_type, false)?;
         targets.push((atom, data));
     }
     X11_CLIPBOARD.store_multiple(X11_CLIPBOARD.setter.atoms.clipboard, targets)?;
