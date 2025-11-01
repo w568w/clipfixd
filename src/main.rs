@@ -1,10 +1,12 @@
 use std::{
     collections::{HashMap, HashSet},
     sync::LazyLock,
+    time::Duration,
 };
 
 use anyhow::anyhow;
 use std::io::Read;
+use timeout_readwrite::TimeoutReadExt;
 use url::Url;
 use wayland_clipboard_listener::{WlClipboardPasteStream, WlListenType};
 use wl_clipboard_rs::{
@@ -25,14 +27,24 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn wayland_get_content(mime_type: &str) -> anyhow::Result<Vec<u8>> {
-    let (mut pipe, _) = wl_clipboard_rs::paste::get_contents(
+    let (pipe, _) = wl_clipboard_rs::paste::get_contents(
         ClipboardType::Regular,
         Seat::Unspecified,
         MimeType::Specific(mime_type),
     )?;
+    let mut pipe = pipe.with_timeout(Duration::from_secs(3));
     let mut bytes = vec![];
-    pipe.read_to_end(&mut bytes)?;
-    Ok(bytes)
+    match pipe.read_to_end(&mut bytes) {
+        Ok(_) => Ok(bytes),
+        Err(e) if e.kind() == std::io::ErrorKind::TimedOut => {
+            eprintln!(
+                "Timed out when reading Wayland clipboard content for mime type {}",
+                mime_type
+            );
+            Ok(bytes)
+        }
+        Err(e) => Err(e.into()),
+    }
 }
 
 fn wayland_get_all_contents<'a>(

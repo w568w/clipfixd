@@ -16,3 +16,4 @@ wl-clipboard-rs = { git = "https://github.com/YaLTeR/wl-clipboard-rs" }
 wayland-clipboard-listener = { git = "https://github.com/w568w/wayland-clipboard-listener" }
 url = "2"
 tempfile = "3"
+timeout-readwrite = "0.4.0"
