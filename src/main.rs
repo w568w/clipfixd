@@ -111,7 +111,14 @@ fn wayland_clipboard_listener() -> anyhow::Result<()> {
                 .suffix(".png")
                 .disable_cleanup(true)
                 .tempfile()?;
-            let bytes = wayland_get_content(MIMETYPE_QT_IMAGE)?;
+            let bytes = match wayland_get_content(MIMETYPE_QT_IMAGE) {
+                Ok(b) => b,
+                Err(e) if matches!(e.downcast_ref::<wl_clipboard_rs::paste::Error>(), Some(wl_clipboard_rs::paste::Error::ClipboardEmpty)) => {
+                    eprintln!("When getting {}, clipboard has been emptied.", MIMETYPE_QT_IMAGE);
+                    continue
+                },
+                Err(e) => return Err(e),
+            };
             std::fs::write(temp_file.path(), bytes)?;
             let url = Url::from_file_path(temp_file.path())
                 .map_err(|_| anyhow!("Failed to convert path to URL"))?;
@@ -123,7 +130,14 @@ fn wayland_clipboard_listener() -> anyhow::Result<()> {
         // Workaround: QQ (X11) copy the image as MIMETYPE_NAUTILUS, but most KDE (Wayland) apps and third-party apps (Wayland) do not support it.
         // So convert it to MIMETYPE_TEXT_URI_LIST for better compatibility.
         if all_mime_types.contains(MIMETYPE_NAUTILUS) {
-            let bytes = wayland_get_content(MIMETYPE_NAUTILUS)?;
+            let bytes = match wayland_get_content(MIMETYPE_NAUTILUS) {
+                Ok(b) => b,
+                Err(e) if matches!(e.downcast_ref::<wl_clipboard_rs::paste::Error>(), Some(wl_clipboard_rs::paste::Error::ClipboardEmpty)) => {
+                    eprintln!("When getting {}, clipboard has been emptied.", MIMETYPE_NAUTILUS);
+                    continue
+                },
+                Err(e) => return Err(e),
+            };
             let data = String::from_utf8(bytes)?;
             let paths = parse_nautilus_clipboard(&data);
             if let Some(path) = paths.first() {
