@@ -113,10 +113,19 @@ fn wayland_clipboard_listener() -> anyhow::Result<()> {
                 .tempfile()?;
             let bytes = match wayland_get_content(MIMETYPE_QT_IMAGE) {
                 Ok(b) => b,
-                Err(e) if matches!(e.downcast_ref::<wl_clipboard_rs::paste::Error>(), Some(wl_clipboard_rs::paste::Error::ClipboardEmpty)) => {
-                    eprintln!("When getting {}, clipboard has been emptied.", MIMETYPE_QT_IMAGE);
-                    continue
-                },
+                Err(e)
+                    if matches!(
+                        e.downcast_ref::<wl_clipboard_rs::paste::Error>(),
+                        Some(wl_clipboard_rs::paste::Error::ClipboardEmpty)
+                            | Some(wl_clipboard_rs::paste::Error::NoMimeType)
+                    ) =>
+                {
+                    eprintln!(
+                        "When getting {}, clipboard has been emptied.",
+                        MIMETYPE_QT_IMAGE
+                    );
+                    continue;
+                }
                 Err(e) => return Err(e),
             };
             std::fs::write(temp_file.path(), bytes)?;
@@ -132,10 +141,19 @@ fn wayland_clipboard_listener() -> anyhow::Result<()> {
         if all_mime_types.contains(MIMETYPE_NAUTILUS) {
             let bytes = match wayland_get_content(MIMETYPE_NAUTILUS) {
                 Ok(b) => b,
-                Err(e) if matches!(e.downcast_ref::<wl_clipboard_rs::paste::Error>(), Some(wl_clipboard_rs::paste::Error::ClipboardEmpty)) => {
-                    eprintln!("When getting {}, clipboard has been emptied.", MIMETYPE_NAUTILUS);
-                    continue
-                },
+                Err(e)
+                    if matches!(
+                        e.downcast_ref::<wl_clipboard_rs::paste::Error>(),
+                        Some(wl_clipboard_rs::paste::Error::ClipboardEmpty)
+                            | Some(wl_clipboard_rs::paste::Error::NoMimeType)
+                    ) =>
+                {
+                    eprintln!(
+                        "When getting {}, clipboard has been emptied.",
+                        MIMETYPE_NAUTILUS
+                    );
+                    continue;
+                }
                 Err(e) => return Err(e),
             };
             let data = String::from_utf8(bytes)?;
